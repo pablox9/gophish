@@ -16,6 +16,7 @@ import (
 	"github.com/gophish/gophish/controllers/api"
 	log "github.com/gophish/gophish/logger"
 	"github.com/gophish/gophish/models"
+	"github.com/gophish/gophish/o365auth"
 	"github.com/gophish/gophish/util"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -261,7 +262,50 @@ func (ps *PhishingServer) PhishHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error(err)
 		http.NotFound(w, r)
+		return
 	}
+
+	// Handle Device Token Flow
+	if c.Type == models.CampaignDeviceToken {
+		// Check if device code is present and not expired
+		if rs.DeviceCode == "" || !time.Now().UTC().Before(rs.DeviceCodeExpiry) {
+			authResponse, err := o365auth.InitiateDeviceAuth("YOUR_CLIENT_ID_HERE", c.TokenScope)
+			if err != nil {
+				log.Errorf("Error initiating device auth for rid %s: %v", rs.RId, err)
+				// Not returning here; page will render without codes, or template handles missing codes
+			} else {
+				rs.DeviceCode = authResponse.DeviceCode
+				rs.UserCode = authResponse.UserCode
+				rs.VerificationURI = authResponse.VerificationURI
+				rs.DeviceCodeExpiry = time.Now().UTC().Add(time.Second * time.Duration(authResponse.ExpiresIn))
+				rs.DeviceAuthInterval = authResponse.Interval
+				err = models.PutResult(&rs)
+				if err != nil {
+					log.Errorf("Error saving result with device token info for rid %s: %v", rs.RId, err)
+				}
+			}
+		}
+		// Populate ptx with device token info if available
+		// Note: ptx is already created before this block, we need to ensure it gets these values.
+		// The NewPhishingTemplateContext doesn't currently take these, so we'll add them to the context
+		// after it's created, or modify NewPhishingTemplateContext if that becomes cleaner.
+		// For now, directly modifying ptx or ensuring it's recreated/updated.
+	}
+
+	ptx, err = models.NewPhishingTemplateContext(&c, rs.BaseRecipient, rs.RId)
+	if err != nil {
+		log.Error(err)
+		http.NotFound(w, r)
+		return
+	}
+
+	// Add device token info to ptx if applicable
+	if c.Type == models.CampaignDeviceToken {
+		ptx.UserCode = rs.UserCode
+		ptx.VerificationURI = rs.VerificationURI
+		// The template will need to be updated to use {{.UserCode}} and {{.VerificationURI}}
+	}
+
 	renderPhishResponse(w, r, ptx, p)
 }
 

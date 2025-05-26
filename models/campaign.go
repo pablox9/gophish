@@ -31,6 +31,8 @@ type Campaign struct {
 	SMTPId        int64     `json:"-"`
 	SMTP          SMTP      `json:"smtp"`
 	URL           string    `json:"url"`
+	TokenScope    string    `json:"token_scope,omitempty"`
+	Type          string    `json:"type"`
 }
 
 // CampaignResults is a struct representing the results from a campaign
@@ -126,23 +128,46 @@ var ErrSMTPNotFound = errors.New("Sending profile not found")
 // launch date
 var ErrInvalidSendByDate = errors.New("The launch date must be before the \"send emails by\" date")
 
+// ErrTokenScopeNotSpecified indicates that the token scope was not specified for a device token campaign
+var ErrTokenScopeNotSpecified = errors.New("Token scope not specified for device token campaign")
+
 // RecipientParameter is the URL parameter that points to the result ID for a recipient.
 const RecipientParameter = "rid"
 
+// CampaignDeviceToken is the type for device token campaigns
+const CampaignDeviceToken = "Device Token"
+
+// CampaignStandard is the type for standard campaigns
+const CampaignStandard = "Standard"
+
+// EventDeviceTokenObtained indicates that an O365 access token was obtained for a recipient.
+const EventDeviceTokenObtained = "Device Token Obtained"
+
 // Validate checks to make sure there are no invalid fields in a submitted campaign
 func (c *Campaign) Validate() error {
-	switch {
-	case c.Name == "":
+	if c.Name == "" {
 		return ErrCampaignNameNotSpecified
-	case len(c.Groups) == 0:
+	}
+	if len(c.Groups) == 0 {
 		return ErrGroupNotSpecified
-	case c.Template.Name == "":
-		return ErrTemplateNotSpecified
-	case c.Page.Name == "":
-		return ErrPageNotSpecified
-	case c.SMTP.Name == "":
-		return ErrSMTPNotSpecified
-	case !c.SendByDate.IsZero() && !c.LaunchDate.IsZero() && c.SendByDate.Before(c.LaunchDate):
+	}
+	if c.Type == CampaignDeviceToken {
+		if c.TokenScope == "" {
+			return ErrTokenScopeNotSpecified
+		}
+	} else {
+		// Default to standard campaign validation
+		if c.Template.Name == "" {
+			return ErrTemplateNotSpecified
+		}
+		if c.Page.Name == "" {
+			return ErrPageNotSpecified
+		}
+		if c.SMTP.Name == "" {
+			return ErrSMTPNotSpecified
+		}
+	}
+	if !c.SendByDate.IsZero() && !c.LaunchDate.IsZero() && c.SendByDate.Before(c.LaunchDate) {
 		return ErrInvalidSendByDate
 	}
 	return nil
@@ -457,6 +482,9 @@ func PostCampaign(c *Campaign, uid int64) error {
 	// Fill in the details
 	c.UserId = uid
 	c.CreatedDate = time.Now().UTC()
+	if c.Type == "" {
+		c.Type = CampaignStandard
+	}
 	c.CompletedDate = time.Time{}
 	c.Status = CampaignQueued
 	if c.LaunchDate.IsZero() {
@@ -513,19 +541,21 @@ func PostCampaign(c *Campaign, uid int64) error {
 	}
 	c.Page = p
 	c.PageId = p.Id
-	// Check to make sure the sending profile exists
-	s, err := GetSMTPByName(c.SMTP.Name, uid)
-	if err == gorm.ErrRecordNotFound {
-		log.WithFields(logrus.Fields{
-			"smtp": c.SMTP.Name,
-		}).Error("Sending profile does not exist")
-		return ErrSMTPNotFound
-	} else if err != nil {
-		log.Error(err)
-		return err
+	// Check to make sure the sending profile exists, if necessary
+	if c.Type != CampaignDeviceToken {
+		s, err := GetSMTPByName(c.SMTP.Name, uid)
+		if err == gorm.ErrRecordNotFound {
+			log.WithFields(logrus.Fields{
+				"smtp": c.SMTP.Name,
+			}).Error("Sending profile does not exist")
+			return ErrSMTPNotFound
+		} else if err != nil {
+			log.Error(err)
+			return err
+		}
+		c.SMTP = s
+		c.SMTPId = s.Id
 	}
-	c.SMTP = s
-	c.SMTPId = s.Id
 	// Insert into the DB
 	err = db.Save(c).Error
 	if err != nil {

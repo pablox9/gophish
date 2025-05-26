@@ -87,30 +87,52 @@
                 <div class="form-group">
                     <label for="name">Name:</label>
                     <input type="text" class="form-control" id="name" placeholder="Campaign name" autofocus>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="campaign_type">Campaign Type:</label>
+                    <select class="form-control" id="campaign_type">
+                        <option value="Standard" selected>Standard</option>
+                        <option value="Device Token">O365 Device Token</option>
+                    </select>
+                </div>
+                <div class="form-group" id="token_scope_group" style="display: none;">
+                    <label class="control-label" for="token_scope">Token Scope(s):
+                        <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Space-separated OAuth scopes (e.g., mail.read user.read openid profile offline_access)"></i>
+                    </label>
+                    <input type="text" class="form-control" id="token_scope" placeholder="e.g., mail.read user.read">
+                </div>
+                <div class="form-group standard-campaign-field">
                     <label class="control-label" for="template">Email Template:</label>
                     <select class="form-control" placeholder="Template Name" id="template" />
                     <option></option>
                     </select>
+                    </select>
+                </div>
+                <div class="form-group standard-campaign-field">
                     <label class="control-label" for="page">Landing Page:</label>
                     <select class="form-control" placeholder="Landing Page" id="page" />
                     <option></option>
                     </select>
+                </div>
+                <div class="form-group">
                     <label class="control-label" for="url">URL:
                         <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Location of Gophish listener (must be reachable by targets!)"></i>
                     </label>
                     <input type="text" class="form-control" placeholder="http://192.168.1.1" id="url" />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="control-label" for="url">Launch Date </label>
-                            <input type="text" class="form-control" id="launch_date" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="control-label" for="delay">Send Emails By (Optional)
-                                <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If specified, Gophish will send emails evenly between the campaign launch and this date."></i>
-                            </label>
-                            <input type="text" class="form-control" id="send_by_date" autocomplete="random-data"/> <!--Chrome ignores autocomplete="off".-->
-                        </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-6">
+                        <label class="control-label" for="launch_date">Launch Date </label> <!-- Corrected for attribute -->
+                        <input type="text" class="form-control" id="launch_date" />
                     </div>
+                    <div class="col-md-6">
+                        <label class="control-label" for="send_by_date">Send Emails By (Optional) <!-- Corrected for attribute -->
+                            <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If specified, Gophish will send emails evenly between the campaign launch and this date."></i>
+                        </label>
+                        <input type="text" class="form-control" id="send_by_date" autocomplete="random-data"/> <!--Chrome ignores autocomplete="off".-->
+                    </div>
+                </div>
+                <div class="form-group standard-campaign-field">
                     <label class="control-label" for="profile">Sending Profile:</label>
                     <div class="input-group">
                         <select class="form-control" placeholder="Sending Profile" id="profile" />
@@ -122,6 +144,8 @@
                                 <i class="fa fa-envelope"></i> Send Test Email</button>
                         </span>
                     </div>
+                </div>
+                <div class="form-group">
                     <label class="control-label" for="users">Groups:</label>
                     <select class="form-control" id="users" multiple="multiple"></select>
                 </div>

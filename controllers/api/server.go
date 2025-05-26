@@ -65,8 +65,19 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/campaigns/summary", as.CampaignsSummary)
 	router.HandleFunc("/campaigns/{id:[0-9]+}", as.Campaign)
 	router.HandleFunc("/campaigns/{id:[0-9]+}/results", as.CampaignResults)
+	// New route for polling O365 token
+	router.HandleFunc("/campaigns/{id:[0-9]+}/results/{rid}/poll_token", mid.Use(as.PollO365Token, mid.RequirePermission(models.PermissionViewCampaigns))).Methods(http.MethodPost)
 	router.HandleFunc("/campaigns/{id:[0-9]+}/summary", as.CampaignSummary)
-	router.HandleFunc("/campaigns/{id:[0-9]+}/complete", as.CampaignComplete)
+	// Corrected CampaignComplete to use POST and require PermissionModifyCampaigns
+	router.HandleFunc("/campaigns/{id:[0-9]+}/complete", mid.Use(as.CampaignComplete, mid.RequirePermission(models.PermissionModifyCampaigns))).Methods(http.MethodPost)
+	
+	// Statistics Endpoints
+	router.HandleFunc("/stats/campaigns/combined", mid.Use(as.GetCampaignStatsCombined, mid.RequirePermission(models.PermissionViewCampaigns))).Methods(http.MethodGet)
+	router.HandleFunc("/stats/user_agent", mid.Use(as.GetUserAgentStatsReport, mid.RequirePermission(models.PermissionViewCampaigns))).Methods(http.MethodGet)
+	router.HandleFunc("/stats/ip", mid.Use(as.GetIPStatsReport, mid.RequirePermission(models.PermissionViewCampaigns))).Methods(http.MethodGet)
+	router.HandleFunc("/stats/timeline", mid.Use(as.GetEventTimelineReport, mid.RequirePermission(models.PermissionViewCampaigns))).Methods(http.MethodGet)
+	router.HandleFunc("/stats/work_hours", mid.Use(as.GetWorkHourDistributionReport, mid.RequirePermission(models.PermissionViewCampaigns))).Methods(http.MethodGet)
+
 	router.HandleFunc("/groups/", as.Groups)
 	router.HandleFunc("/groups/summary", as.GroupsSummary)
 	router.HandleFunc("/groups/{id:[0-9]+}", as.Group)

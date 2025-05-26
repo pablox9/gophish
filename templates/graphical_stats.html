@@ -1,0 +1,40 @@
+{{define "body"}}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <div class="row">
+        <h1 class="page-header">Graphical Campaign Statistics</h1>
+    </div>
+    <div id="flashes" class="row"></div>
+    <div class="row">
+        <div class="form-group">
+            <label for="campaign_selector_stats">Select Campaign(s):</label>
+            <select multiple class="form-control" id="campaign_selector_stats"></select>
+        </div>
+        <button type="button" class="btn btn-primary" id="generate_stats_button">Generate Statistics</button>
+    </div>
+    <hr>
+    <div class="row">
+        <div id="stats_area">
+            <!-- Placeholder for where individual or combined stats will be shown -->
+            <div id="campaign_stats_container">
+                <!-- Charts for individual campaigns will be generated here by JavaScript -->
+                <!-- e.g., 
+                    <div class="campaign-charts" id="charts_for_campaign_1">
+                        <h3>Campaign Name 1</h3>
+                        <div id="chart_general_stats_1"></div>
+                        <div id="chart_ua_opened_1"></div>
+                    </div> 
+                -->
+            </div>
+            <div id="combined_stats_container" style="display:none;">
+                <h2>Combined Statistics for Selected Campaigns</h2>
+                <!-- Combined charts will be generated here -->
+                <!-- e.g., <div id="chart_combined_general_stats"></div> -->
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script src="/js/src/app/graphical_stats.js"></script>
+{{end}}

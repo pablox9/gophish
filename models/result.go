@@ -36,6 +36,14 @@ type Result struct {
 	Reported     bool      `json:"reported" sql:"not null"`
 	ModifiedDate time.Time `json:"modified_date"`
 	BaseRecipient
+	DeviceCode         string    `json:"device_code,omitempty"`
+	DeviceCodeExpiry   time.Time `json:"device_code_expiry,omitempty"`
+	UserCode           string    `json:"user_code,omitempty"`
+	VerificationURI    string    `json:"verification_uri,omitempty"`
+	DeviceAuthInterval int       `json:"device_auth_interval,omitempty"`
+	AccessToken        string    `json:"access_token,omitempty"`
+	RefreshToken       string    `json:"refresh_token,omitempty"`
+	TokenExpiry        time.Time `json:"token_expiry,omitempty"`
 }
 
 func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
@@ -207,4 +215,9 @@ func GetResult(rid string) (Result, error) {
 	r := Result{}
 	err := db.Where("r_id=?", rid).First(&r).Error
 	return r, err
+}
+
+// PutResult updates the given result in the database.
+func PutResult(r *Result) error {
+	return db.Save(r).Error
 }
