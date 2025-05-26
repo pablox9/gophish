@@ -250,7 +250,7 @@ func (as *Server) CampaignComplete(w http.ResponseWriter, r *http.Request) {
 func (as *Server) GetAggregatedCampaignSummary(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Get(r, "user").(models.User)
 	if user.Id == 0 {
-		JSONResponse(w, models.Response{Success: false, Message: models.ErrUnauthorized.Error()}, http.StatusUnauthorized)
+		JSONResponse(w, models.Response{Success: false, Message: http.StatusText(http.StatusUnauthorized)}, http.StatusUnauthorized)
 		return
 	}
 
@@ -294,7 +294,7 @@ func (as *Server) GetAggregatedCampaignSummary(w http.ResponseWriter, r *http.Re
 func (as *Server) GetCampaignTimeline(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Get(r, "user").(models.User)
 	if user.Id == 0 {
-		JSONResponse(w, models.Response{Success: false, Message: models.ErrUnauthorized.Error()}, http.StatusUnauthorized)
+		JSONResponse(w, models.Response{Success: false, Message: http.StatusText(http.StatusUnauthorized)}, http.StatusUnauthorized)
 		return
 	}
 
@@ -340,7 +340,7 @@ func (as *Server) GetCampaignTimeline(w http.ResponseWriter, r *http.Request) {
 func (as *Server) GetCampaignUserAgentDistribution(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Get(r, "user").(models.User)
 	if user.Id == 0 {
-		JSONResponse(w, models.Response{Success: false, Message: models.ErrUnauthorized.Error()}, http.StatusUnauthorized)
+		JSONResponse(w, models.Response{Success: false, Message: http.StatusText(http.StatusUnauthorized)}, http.StatusUnauthorized)
 		return
 	}
 
@@ -385,7 +385,7 @@ func (as *Server) GetCampaignUserAgentDistribution(w http.ResponseWriter, r *htt
 func (as *Server) GetCampaignIPDistribution(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Get(r, "user").(models.User)
 	if user.Id == 0 {
-		JSONResponse(w, models.Response{Success: false, Message: models.ErrUnauthorized.Error()}, http.StatusUnauthorized)
+		JSONResponse(w, models.Response{Success: false, Message: http.StatusText(http.StatusUnauthorized)}, http.StatusUnauthorized)
 		return
 	}
 
@@ -433,7 +433,7 @@ func (as *Server) GetCampaignIPDistribution(w http.ResponseWriter, r *http.Reque
 func (as *Server) GetCampaignHourlyDistribution(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Get(r, "user").(models.User)
 	if user.Id == 0 {
-		JSONResponse(w, models.Response{Success: false, Message: models.ErrUnauthorized.Error()}, http.StatusUnauthorized)
+		JSONResponse(w, models.Response{Success: false, Message: http.StatusText(http.StatusUnauthorized)}, http.StatusUnauthorized)
 		return
 	}
 
