@@ -208,3 +208,26 @@ func GetResult(rid string) (Result, error) {
 	err := db.Where("r_id=?", rid).First(&r).Error
 	return r, err
 }
+
+// GetResultsByCampaignIDsAndStatuses fetches results for a given list of campaign IDs and statuses,
+// ensuring the user has access to these campaigns.
+func GetResultsByCampaignIDsAndStatuses(campaignIDs []int64, statuses []string, userID int64) ([]Result, error) {
+	results := []Result{}
+	if len(campaignIDs) == 0 || len(statuses) == 0 {
+		return results, nil
+	}
+
+	// The Result struct has UserId, so we can filter by it directly.
+	// This also implicitly handles campaign ownership as results are tied to a user.
+	err := db.Where("campaign_id IN (?) AND status IN (?) AND user_id = ?", campaignIDs, statuses, userID).Find(&results).Error
+	if err != nil {
+		log.WithFields(log.Fields{
+			"campaign_ids": campaignIDs,
+			"statuses":     statuses,
+			"user_id":      userID,
+			"error":        err,
+		}).Error("Error fetching results by campaign IDs and statuses")
+		return nil, err
+	}
+	return results, nil
+}

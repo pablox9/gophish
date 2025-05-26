@@ -1,0 +1,106 @@
+{{template "base.html" .}}
+
+{{define "title"}}Campaign Statistics{{end}}
+
+{{define "content"}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Campaign Statistics</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div id="campaign-selector-container" class="form-group">
+                <label for="campaign-select">Select Campaigns:</label>
+                <select multiple="multiple" id="campaign-select" class="form-control"></select>
+                <p class="help-block">Select one or more campaigns to view aggregated statistics. If no campaigns are selected, statistics for all campaigns will be shown.</p>
+                <button id="refresh-stats-button" class="btn btn-primary" style="margin-top: 10px;">Refresh Statistics</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="charts-container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> General Campaign Stats</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="general-stats-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-line-chart fa-fw"></i> Event Timeline</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="event-timeline-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-pie-chart fa-fw"></i> User Agent Distribution</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="user-agent-chart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-pie-chart fa-fw"></i> Hourly Event Distribution</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="hourly-distribution-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-map-marker fa-fw"></i> IP Address Distribution (Top 20)</h3>
+                    </div>
+                    <div class="panel-body">
+                         <div id="ip-distribution-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Optional: Placeholder for another chart, e.g., Geolocation Map -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-globe fa-fw"></i> Event Locations (Geolocation)</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="geolocation-chart" style="height: 400px;"></div>
+                         <p class="small text-muted">Note: Geolocation is based on IP address and may not always be precise. MaxMind GeoLite2 data used.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- /#charts-container -->
+</div>
+
+<script src="/static/js/dist/app/statistics.min.js"></script>
+{{end}}

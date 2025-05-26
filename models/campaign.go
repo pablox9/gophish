@@ -638,6 +638,74 @@ func DeleteCampaign(id int64) error {
 	return err
 }
 
+// GetAggregatedCampaignStats calculates the sum of CampaignStats for a given list of campaign IDs,
+// ensuring the user has access to these campaigns.
+func GetAggregatedCampaignStats(campaignIDs []int64, userID int64) (CampaignStats, error) {
+	aggregatedStats := CampaignStats{}
+	if len(campaignIDs) == 0 {
+		return aggregatedStats, nil
+	}
+
+	for _, id := range campaignIDs {
+		summary, err := GetCampaignSummary(id, userID)
+		if err != nil {
+			// If a specific campaign summary can't be fetched (e.g. not found or access denied),
+			// log it and continue, or return error immediately based on desired behavior.
+			// For now, let's return the error.
+			log.WithFields(logrus.Fields{
+				"campaign_id": id,
+				"user_id":     userID,
+				"error":       err,
+			}).Error("Error fetching campaign summary for aggregation")
+			return CampaignStats{}, err
+		}
+		aggregatedStats.Total += summary.Stats.Total
+		aggregatedStats.EmailsSent += summary.Stats.EmailsSent
+		aggregatedStats.OpenedEmail += summary.Stats.OpenedEmail
+		aggregatedStats.ClickedLink += summary.Stats.ClickedLink
+		aggregatedStats.SubmittedData += summary.Stats.SubmittedData
+		aggregatedStats.EmailReported += summary.Stats.EmailReported
+		aggregatedStats.Error += summary.Stats.Error
+	}
+	return aggregatedStats, nil
+}
+
+// GetEventsByCampaignIDs fetches all events for a given list of campaign IDs,
+// ensuring the user has access to these campaigns.
+func GetEventsByCampaignIDs(campaignIDs []int64, userID int64) ([]Event, error) {
+	events := []Event{}
+	if len(campaignIDs) == 0 {
+		return events, nil
+	}
+
+	// First, validate which of the given campaignIDs are accessible by the user
+	var accessibleCampaignIDs []int64
+	err := db.Table("campaigns").Where("id IN (?) AND user_id = ?", campaignIDs, userID).Pluck("id", &accessibleCampaignIDs).Error
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"user_id": userID,
+			"error":   err,
+		}).Error("Error fetching accessible campaign IDs")
+		return events, err
+	}
+
+	if len(accessibleCampaignIDs) == 0 {
+		// No accessible campaigns found for the given IDs
+		return events, nil
+	}
+
+	// Fetch events for the accessible campaigns
+	err = db.Where("campaign_id IN (?)", accessibleCampaignIDs).Order("time desc").Find(&events).Error
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"campaign_ids": accessibleCampaignIDs,
+			"error":        err,
+		}).Error("Error fetching events by campaign IDs")
+		return events, err
+	}
+	return events, nil
+}
+
 // CompleteCampaign effectively "ends" a campaign.
 // Any future emails clicked will return a simple "404" page.
 func CompleteCampaign(id int64, uid int64) error {
