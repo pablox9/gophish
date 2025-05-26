@@ -10,6 +10,7 @@ import (
 	log "github.com/gophish/gophish/logger"
 	"github.com/jinzhu/gorm"
 	"github.com/oschwald/maxminddb-golang"
+	"github.com/sirupsen/logrus"
 )
 
 type mmCity struct {
@@ -221,7 +222,7 @@ func GetResultsByCampaignIDsAndStatuses(campaignIDs []int64, statuses []string, 
 	// This also implicitly handles campaign ownership as results are tied to a user.
 	err := db.Where("campaign_id IN (?) AND status IN (?) AND user_id = ?", campaignIDs, statuses, userID).Find(&results).Error
 	if err != nil {
-		log.WithFields(log.Fields{
+		log.WithFields(logrus.Fields{
 			"campaign_ids": campaignIDs,
 			"statuses":     statuses,
 			"user_id":      userID,
