@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y libsqlite3-dev gcc && rm -rf /var/lib/a
 
 WORKDIR /go/src/github.com/gophish/gophish
 COPY . .
-RUN go get -v && go build -v
+RUN go get -v && go build -v -tags libsqlite3
 
 
 # Runtime container
