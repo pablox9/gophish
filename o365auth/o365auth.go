@@ -1,7 +1,6 @@
 package o365auth
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"

@@ -12,6 +12,9 @@ RUN gulp
 # Build Golang binary
 FROM golang:1.15.2 AS build-golang
 
+# Install SQLite3 development libraries and GCC
+RUN apt-get update && apt-get install -y libsqlite3-dev gcc && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /go/src/github.com/gophish/gophish
 COPY . .
 RUN go get -v && go build -v
